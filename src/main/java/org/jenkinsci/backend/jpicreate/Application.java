@@ -1,4 +1,4 @@
-package test;
+package org.jenkinsci.backend.jpicreate;
 
 /**
  * @author Kohsuke Kawaguchi

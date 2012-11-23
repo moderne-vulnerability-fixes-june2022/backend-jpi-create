@@ -1,6 +1,10 @@
-package test;
+package org.jenkinsci.backend.jpicreate;
 
+import org.kohsuke.stapler.StaticViewFacet;
+import org.kohsuke.stapler.WebApp;
 import org.kohsuke.stapler.framework.AbstractWebAppMain;
+
+import javax.servlet.ServletContextEvent;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -8,6 +12,12 @@ import org.kohsuke.stapler.framework.AbstractWebAppMain;
 public class WebAppMain extends AbstractWebAppMain<Application> {
     public WebAppMain() {
         super(Application.class);
+    }
+
+    @Override
+    public void contextInitialized(ServletContextEvent event) {
+        super.contextInitialized(event);
+        WebApp.get(context).facets.add(new StaticViewFacet(".html"));
     }
 
     @Override
