@@ -34,7 +34,6 @@ public class Application {
         this.mvn = mvn;
     }
 
-    @RequirePOST
     public HttpResponse doGenerate(@QueryParameter("name") String _name) throws IOException, InterruptedException {
         if (_name.endsWith("-plugin"))  _name = _name.substring(0,_name.length()-7);
 
