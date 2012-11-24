@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -34,6 +35,8 @@ public class Application {
         final String name = _name;
         if (!NAME.matcher(name).matches())
             return HttpResponses.plainText("Invalid plugin name: "+name);
+
+        LOGGER.info("Generating "+name);
 
         File settings = File.createTempFile("settings","xml");
         FileUtils.copyURLToFile(getClass().getClassLoader().getResource("settings.xml"),settings);
@@ -86,5 +89,7 @@ public class Application {
     }
 
     private static final Pattern NAME = Pattern.compile("[a-zA-Z0-9_-]+");
+
+    private static final Logger LOGGER = Logger.getLogger(Application.class.getName());
 }
 
