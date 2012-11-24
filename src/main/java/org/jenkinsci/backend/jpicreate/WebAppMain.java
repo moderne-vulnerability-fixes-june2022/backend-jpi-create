@@ -27,6 +27,6 @@ public class WebAppMain extends AbstractWebAppMain<Application> {
 
     @Override
     protected Object createApplication() throws Exception {
-        return new Application();
+        return new Application(context);
     }
 }
