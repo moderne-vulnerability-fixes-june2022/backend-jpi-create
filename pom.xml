@@ -128,7 +128,7 @@
         <artifactId>bees-maven-plugin</artifactId>
         <version>1.3.2</version>
         <configuration>
-          <appid>kohsuke/jpi-create</appid>
+          <appid>jenkins/jpi-create</appid>
         </configuration>
       </plugin>
     </plugins>
