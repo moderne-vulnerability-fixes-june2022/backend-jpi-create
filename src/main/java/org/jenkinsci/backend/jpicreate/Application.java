@@ -52,7 +52,8 @@ public class Application {
                     "-s",settings.getAbsolutePath(),
                     "org.jenkins-ci.tools:maven-hpi-plugin:LATEST:create",
                     "-DgroupId=org.jenkins-ci.plugins",
-                    "-DartifactId="+name)
+                    "-DartifactId="+name,
+                    "-DpackageName=org.jenkinsci.plugins."+name.replace('-','_'))
                 .redirectErrorStream(true)
                 .directory(tmpDir)
                 .start();
