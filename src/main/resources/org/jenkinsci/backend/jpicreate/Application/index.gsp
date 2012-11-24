@@ -52,6 +52,8 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <% adjunct("org.kohsuke.stapler.bootstrap-responsive") %>
   </head>
 
   <body>
@@ -149,7 +151,5 @@
         </div>
 
     </div> <!-- /container -->
-
-    <% adjunct("org.kohsuke.stapler.bootstrap-responsive") %>
   </body>
 </html>
