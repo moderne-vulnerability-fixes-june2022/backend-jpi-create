@@ -79,10 +79,10 @@
           <form class="form-horizontal" method="post" action="generate" id="form">
               <fieldset>
                   <div class="control-group"><!-- add warning CSS class-->
-                      <label class="control-label" for="artifactId">Name</label>
+                      <label class="control-label" for="name">Name</label>
 
                       <div class="controls">
-                          <input type="text" class="input-xlarge" value="awesome-plugin" name="name" autofocus>
+                          <input type="text" class="input-xlarge" value="awesome-plugin" id="name" name="name" autofocus>
                           <!--
                           <p class="help-block">Pick the name of your plugin</p>
                           -->
