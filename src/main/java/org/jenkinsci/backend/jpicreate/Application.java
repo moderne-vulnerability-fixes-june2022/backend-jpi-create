@@ -3,6 +3,8 @@ package org.jenkinsci.backend.jpicreate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Zip;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
@@ -15,6 +17,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -74,18 +77,17 @@ public class Application {
             return new HttpResponse() {
                 public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
                     try {
-                        Process proc = new ProcessBuilder("zip","-r","-",".")
-                                .directory(tmpDir)
-                                .start();
-                        proc.getOutputStream().close();
+                        File zipFile = File.createTempFile("plugin","zip");
+                        zipFile.delete();
+                        Zip zip = new Zip();
+                        zip.setProject(new Project());
+                        zip.setDestFile(zipFile);
+                        zip.setBasedir(tmpDir);
+                        zip.execute();
+
                         rsp.setContentType("application/octet-stream");
                         rsp.setHeader("Content-Disposition","attachment; filename="+name+"-plugin.zip");
-                        IOUtils.copy(proc.getInputStream(),rsp.getOutputStream());
-                        proc.waitFor();
-                        proc.getInputStream().close();
-                        proc.getErrorStream().close();
-                    } catch (InterruptedException e) {
-                        throw (IOException)new IOException().initCause(e);
+                        IOUtils.copy(new FileInputStream(zipFile), rsp.getOutputStream());
                     } finally {
                         FileUtils.deleteDirectory(tmpDir);
                     }

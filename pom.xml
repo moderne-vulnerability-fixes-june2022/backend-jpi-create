@@ -77,7 +77,8 @@
                   <classifier>bin</classifier>
                   <type>zip</type>
                   <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.directory}/classes/maven.zip</outputDirectory>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                  <destFileName>maven.zip</destFileName>
                 </artifactItem>
               </artifactItems>
             </configuration>
