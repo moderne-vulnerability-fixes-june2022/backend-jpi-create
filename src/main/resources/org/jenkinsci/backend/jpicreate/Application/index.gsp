@@ -41,11 +41,16 @@
 
         #form {
             padding-top: 2em;
+            clear: both;
         }
 
       .marketing p + h4 {
         margin-top: 28px;
       }
+
+        .bigtext {
+            font-size: 28px !important;
+        }
     </style>
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -70,6 +75,7 @@
         -->
 
       <div class="jumbotron">
+          <img src=logo.png style="float:left">
         <h1>Plugin Skeleton Generator</h1>
         <!--
           <p class="lead">
@@ -81,10 +87,10 @@
           <form class="form-horizontal" method="post" action="generate" id="form">
               <fieldset>
                   <div class="control-group"><!-- add warning CSS class-->
-                      <label class="control-label" for="name">Name</label>
+                      <label class="control-label bigtext" for="name" style="padding-top:12px">Name</label>
 
                       <div class="controls">
-                          <input type="text" class="input-xlarge" value="awesome-plugin" id="name" name="name" autofocus>
+                          <input type="text" class="input-xlarge" value="awesome-plugin" id="name" name="name" autofocus style="font-size:28px; height:32px">
                           <!--
                           <p class="help-block">Pick the name of your plugin</p>
                           -->
@@ -151,5 +157,8 @@
         </div>
 
     </div> <!-- /container -->
+  <script>
+      \$(document).load(function () { \$(name).focus().select() });
+  </script>
   </body>
 </html>
