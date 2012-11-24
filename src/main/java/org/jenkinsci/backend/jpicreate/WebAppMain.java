@@ -9,6 +9,7 @@ import org.kohsuke.stapler.framework.AbstractWebAppMain;
 import javax.servlet.ServletContextEvent;
 import javax.sound.midi.SysexMessage;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -31,6 +32,11 @@ public class WebAppMain extends AbstractWebAppMain<Application> {
 
     @Override
     protected Object createApplication() throws Exception {
+        File home = extractMaven();
+        return new Application(context, new File(home,"bin/mvn"));
+    }
+
+    private File extractMaven() throws IOException, InterruptedException {
         File zip = File.createTempFile("maven","zip");
         FileUtils.copyURLToFile(
                 getClass().getClassLoader().getResource("maven.zip"),
@@ -42,11 +48,10 @@ public class WebAppMain extends AbstractWebAppMain<Application> {
         Process unzip = new ProcessBuilder("unzip", zip.getAbsolutePath())
                 .directory(bin).redirectErrorStream(true).start();
         unzip.getOutputStream().close();
-        IOUtils.copy(unzip.getInputStream(),System.out);
+        IOUtils.copy(unzip.getInputStream(), System.out);
         if (unzip.waitFor()!=0) {
             throw new Error("Unzip Maven failed");
         }
-
-        return new Application(context, new File(bin.listFiles()[0],"bin/mvn"));
+        return bin.listFiles()[0];
     }
 }
