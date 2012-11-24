@@ -2,6 +2,7 @@ package org.jenkinsci.backend.jpicreate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
@@ -57,7 +58,7 @@ public class Application {
                 .start();
             proc.getOutputStream().close();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtils.copy(proc.getInputStream(), baos);
+            IOUtils.copy(proc.getInputStream(), new TeeOutputStream(System.out,baos));
             if (proc.waitFor()!=0) {
                 // error
                 return HttpResponses.plainText(baos.toString());
