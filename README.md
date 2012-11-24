@@ -6,5 +6,5 @@ but it's less error prone and doesn't require fiddling `~/.m2/settings.xml`
 
 To run app locally to test, `mvn jetty:run`.
 
-To deploy this app into production, `mvn bees:deploy`. This application
+To deploy this app into [production](http://plugin-generator.jenkins-ci.org/), `mvn bees:deploy`. This application
 runs on CloudBees RUN@cloud under the `jenkins` account
