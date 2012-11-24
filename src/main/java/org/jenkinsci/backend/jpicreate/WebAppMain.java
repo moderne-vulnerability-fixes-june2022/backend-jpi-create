@@ -1,10 +1,14 @@
 package org.jenkinsci.backend.jpicreate;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaticViewFacet;
 import org.kohsuke.stapler.WebApp;
 import org.kohsuke.stapler.framework.AbstractWebAppMain;
 
 import javax.servlet.ServletContextEvent;
+import javax.sound.midi.SysexMessage;
+import java.io.File;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -27,6 +31,22 @@ public class WebAppMain extends AbstractWebAppMain<Application> {
 
     @Override
     protected Object createApplication() throws Exception {
-        return new Application(context);
+        File zip = File.createTempFile("maven","zip");
+        FileUtils.copyURLToFile(
+                getClass().getClassLoader().getResource("maven.zip"),
+                zip);
+        File bin = File.createTempFile("maven","bin");
+        bin.delete();
+        bin.mkdirs();
+
+        Process unzip = new ProcessBuilder("unzip", zip.getAbsolutePath())
+                .directory(bin).redirectErrorStream(true).start();
+        unzip.getOutputStream().close();
+        IOUtils.copy(unzip.getInputStream(),System.out);
+        if (unzip.waitFor()!=0) {
+            throw new Error("Unzip Maven failed");
+        }
+
+        return new Application(context, new File(bin.listFiles()[0],"bin/mvn"));
     }
 }

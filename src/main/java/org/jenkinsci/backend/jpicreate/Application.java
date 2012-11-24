@@ -24,9 +24,11 @@ import java.util.regex.Pattern;
  */
 public class Application {
     public final AdjunctManager adjuncts;
+    private final File mvn;
 
-    public Application(ServletContext context) {
+    public Application(ServletContext context, File mvn) {
         this.adjuncts = new AdjunctManager(context,getClass().getClassLoader(),"adjuncts");
+        this.mvn = mvn;
     }
 
     @RequirePOST
@@ -47,13 +49,17 @@ public class Application {
             tmpDir.delete();
             tmpDir.mkdir();
 
-            Process proc = new ProcessBuilder("mvn",
-                    "-B","-U",
-                    "-s",settings.getAbsolutePath(),
+            ProcessBuilder pb = new ProcessBuilder(mvn.getAbsolutePath(),
+                    "-B", "-U",
+                    "-s", settings.getAbsolutePath(),
                     "org.jenkins-ci.tools:maven-hpi-plugin:LATEST:create",
                     "-DgroupId=org.jenkins-ci.plugins",
-                    "-DartifactId="+name,
-                    "-DpackageName=org.jenkinsci.plugins."+name.replace('-','_'))
+                    "-DartifactId=" + name,
+                    "-DpackageName=org.jenkinsci.plugins." + name.replace('-', '_'));
+
+            pb.environment().put("JAVA_HOME",System.getProperty("java.home"));
+
+            Process proc = pb
                 .redirectErrorStream(true)
                 .directory(tmpDir)
                 .start();
