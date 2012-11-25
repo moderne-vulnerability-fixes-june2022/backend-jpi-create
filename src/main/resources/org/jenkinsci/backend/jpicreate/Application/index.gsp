@@ -58,7 +58,7 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <% adjunct("org.kohsuke.stapler.bootstrap-responsive") %>
+    <% adjunct 'org.kohsuke.stapler.bootstrap-responsive' %>
   </head>
 
   <body>
@@ -124,9 +124,9 @@
         <hr>
 
         <div style="margin-bottom: 1em">
-            Or if you are a command-line person, run the following from your console:
+            Or if you are a command-line person, run the following from your console (or even turn this into a shell script):
         </div>
-        <pre>curl '${request.requestURL}/generate?name=<span class='plugin-name'>awesome-plugin</span>&type=tar' | tar xvz</pre>
+        <input type=text id="cmdline" style="width:100%" readonly>
 
         <hr>
 
@@ -170,11 +170,20 @@
   <script>
       Q = \$;
 
+      function cmdline(name) {
+          return "curl '${request.requestURL}generate?type=tar&name="+name+"' | tar xvz"
+      }
+
       Q(document).ready(function () {
           function update() {
-              Q('.plugin-name').html(this.value);
+              var text = cmdline(this.value);
+              Q('#cmdline').val(text);
           }
+
           Q('#name').change(update).keyup(update).focus().select()
+          update.call(Q('#name')[0])
+
+          Q('#cmdline').focus(function() {setTimeout(function(){Q('#cmdline').select()},0)})
       });
   </script>
   </body>
