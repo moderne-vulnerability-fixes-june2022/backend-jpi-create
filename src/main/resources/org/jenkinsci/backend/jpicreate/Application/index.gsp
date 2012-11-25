@@ -91,6 +91,7 @@
 
                       <div class="controls">
                           <input type="text" class="input-xlarge" value="awesome-plugin" id="name" name="name" autofocus style="font-size:28px; height:32px">
+
                           <!--
                           <p class="help-block">Pick the name of your plugin</p>
                           -->
@@ -110,6 +111,8 @@
                   </div>
                   -->
                   <div style="padding-top: 1em">
+                      <input type="hidden" value="ZIP" name="type">
+
                       <button type="submit" class="btn btn-large btn-primary">
                           <i class="icon-download-alt icon-white"></i> Generate
                       </button>
@@ -117,6 +120,13 @@
               </fieldset>
           </form>
       </div>
+
+        <hr>
+
+        <div style="margin-bottom: 1em">
+            Or if you are a command-line person, run the following from your console:
+        </div>
+        <pre>curl '${request.requestURL}/generate?name=awesome-plugin&type=tar' | tar xvz</pre>
 
         <hr>
 

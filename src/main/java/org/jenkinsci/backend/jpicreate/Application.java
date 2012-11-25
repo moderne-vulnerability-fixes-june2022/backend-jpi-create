@@ -75,8 +75,6 @@ public class Application {
             }
 
             final File archive;
-            if (type==null)     type=Type.ZIP;
-
             switch (type) {
             case ZIP:
                 archive = File.createTempFile("plugin","zip");
@@ -111,7 +109,7 @@ public class Application {
                         rsp.setHeader("Content-Disposition","attachment; filename="+name+"-plugin"+name.substring(name.lastIndexOf('.')));
                         IOUtils.copy(new FileInputStream(archive), rsp.getOutputStream());
                     } finally {
-                        FileUtils.deleteDirectory(archive);
+                        archive.delete();
                     }
                 }
             };
