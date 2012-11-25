@@ -170,20 +170,23 @@
   <script>
       Q = \$;
 
-      function cmdline(name) {
-          return "curl '${request.requestURL}generate?type=tar&name="+name+"' | tar xvz"
-      }
-
       Q(document).ready(function () {
+          function cmdline(name) {
+              return "curl '${request.requestURL}generate?type=tar&name="+name+"' | tar xvz"
+          }
+
           function update() {
-              var text = cmdline(this.value);
-              Q('#cmdline').val(text);
+              Q('#cmdline').val(cmdline(this.value));
           }
 
           Q('#name').change(update).keyup(update).focus().select()
           update.call(Q('#name')[0])
 
-          Q('#cmdline').focus(function() {setTimeout(function(){Q('#cmdline').select()},0)})
+          Q('#cmdline').focus(function() {
+              setTimeout(function(){
+                  Q('#cmdline').select()
+              },0)
+          })
       });
   </script>
   </body>
