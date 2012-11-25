@@ -126,7 +126,7 @@
         <div style="margin-bottom: 1em">
             Or if you are a command-line person, run the following from your console:
         </div>
-        <pre>curl '${request.requestURL}/generate?name=awesome-plugin&type=tar' | tar xvz</pre>
+        <pre>curl '${request.requestURL}/generate?name=<span class='plugin-name'>awesome-plugin</span>&type=tar' | tar xvz</pre>
 
         <hr>
 
@@ -168,7 +168,14 @@
 
     </div> <!-- /container -->
   <script>
-      \$(document).load(function () { \$(name).focus().select() });
+      Q = \$;
+
+      Q(document).ready(function () {
+          function update() {
+              Q('.plugin-name').html(this.value);
+          }
+          Q('#name').change(update).keyup(update).focus().select()
+      });
   </script>
   </body>
 </html>
