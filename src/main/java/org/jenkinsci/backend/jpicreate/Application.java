@@ -4,6 +4,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Tar;
+import org.apache.tools.ant.taskdefs.Tar.TarCompressionMethod;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
@@ -11,7 +13,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.framework.adjunct.AdjunctManager;
-import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -34,7 +35,7 @@ public class Application {
         this.mvn = mvn;
     }
 
-    public HttpResponse doGenerate(@QueryParameter("name") String _name) throws IOException, InterruptedException {
+    public HttpResponse doGenerate(@QueryParameter("name") String _name, @QueryParameter Type type) throws IOException, InterruptedException {
         if (_name.endsWith("-plugin"))  _name = _name.substring(0,_name.length()-7);
 
         final String name = _name;
@@ -46,8 +47,8 @@ public class Application {
         File settings = File.createTempFile("settings","xml");
         FileUtils.copyURLToFile(getClass().getClassLoader().getResource("settings.xml"),settings);
 
+        final File tmpDir = File.createTempFile("plugin","gen");
         try {
-            final File tmpDir = File.createTempFile("plugin","gen");
             tmpDir.delete();
             tmpDir.mkdir();
 
@@ -73,26 +74,49 @@ public class Application {
                 return HttpResponses.plainText(baos.toString());
             }
 
+            final File archive;
+            if (type==null)     type=Type.ZIP;
+
+            switch (type) {
+            case ZIP:
+                archive = File.createTempFile("plugin","zip");
+                archive.delete();
+                Zip zip = new Zip();
+                zip.setProject(new Project());
+                zip.setDestFile(archive);
+                zip.setBasedir(tmpDir);
+                zip.execute();
+                break;
+            case TAR:
+                archive = File.createTempFile("plugin","tar.gz");
+                archive.delete();
+                Tar tar = new Tar();
+                TarCompressionMethod comp = new TarCompressionMethod();
+                comp.setValue("gzip");
+                tar.setCompression(comp);
+                tar.setProject(new Project());
+                tar.setDestFile(archive);
+                tar.setBasedir(tmpDir);
+                tar.execute();
+                break;
+            default:
+                throw new Error();
+            }
+
             return new HttpResponse() {
                 public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
                     try {
-                        File zipFile = File.createTempFile("plugin","zip");
-                        zipFile.delete();
-                        Zip zip = new Zip();
-                        zip.setProject(new Project());
-                        zip.setDestFile(zipFile);
-                        zip.setBasedir(tmpDir);
-                        zip.execute();
-
                         rsp.setContentType("application/octet-stream");
-                        rsp.setHeader("Content-Disposition","attachment; filename="+name+"-plugin.zip");
-                        IOUtils.copy(new FileInputStream(zipFile), rsp.getOutputStream());
+                        String name = archive.getName();
+                        rsp.setHeader("Content-Disposition","attachment; filename="+name+"-plugin"+name.substring(name.lastIndexOf('.')));
+                        IOUtils.copy(new FileInputStream(archive), rsp.getOutputStream());
                     } finally {
-                        FileUtils.deleteDirectory(tmpDir);
+                        FileUtils.deleteDirectory(archive);
                     }
                 }
             };
         } finally {
+            FileUtils.deleteDirectory(tmpDir);
             settings.delete();
         }
     }
