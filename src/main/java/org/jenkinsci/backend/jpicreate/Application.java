@@ -77,7 +77,7 @@ public class Application {
             final File archive;
             switch (type) {
             case ZIP:
-                archive = File.createTempFile("plugin","zip");
+                archive = File.createTempFile("plugin",".zip");
                 archive.delete();
                 Zip zip = new Zip();
                 zip.setProject(new Project());
@@ -86,7 +86,7 @@ public class Application {
                 zip.execute();
                 break;
             case TAR:
-                archive = File.createTempFile("plugin","tar.gz");
+                archive = File.createTempFile("plugin",".tgz");
                 archive.delete();
                 Tar tar = new Tar();
                 TarCompressionMethod comp = new TarCompressionMethod();
