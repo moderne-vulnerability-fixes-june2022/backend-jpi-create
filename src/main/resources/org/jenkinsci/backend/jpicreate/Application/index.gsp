@@ -172,7 +172,7 @@
 
       Q(document).ready(function () {
           function cmdline(name) {
-              return "curl '${request.requestURL}generate?type=tar&name="+name+"' | tar xvz"
+              return "curl '${request.requestURL}generate?type=TAR&name="+name+"' | tar xvz"
           }
 
           function update() {
