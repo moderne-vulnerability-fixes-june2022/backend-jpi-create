@@ -20,6 +20,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -29,13 +36,25 @@ import java.util.regex.Pattern;
 public class Application {
     public final AdjunctManager adjuncts;
     private final File mvn;
+    private final ScheduledExecutorService periodUpdateCheck = Executors.newScheduledThreadPool(1);
 
     public Application(ServletContext context, File mvn) {
         this.adjuncts = new AdjunctManager(context,getClass().getClassLoader(),"adjuncts");
         this.mvn = mvn;
+
+        // periodically perform up-to-date check
+        periodUpdateCheck.submit(new Callable<Object>() {
+            public Object call() throws Exception {
+                HttpResponse r = doGenerate("bogus", Type.ZIP, true);
+                if (r instanceof Archive)
+                    ((Archive)r).clear();
+                periodUpdateCheck.schedule(this,15,TimeUnit.MINUTES);
+                return null;
+            }
+        });
     }
 
-    public HttpResponse doGenerate(@QueryParameter("name") String _name, @QueryParameter Type type) throws IOException, InterruptedException {
+    public HttpResponse doGenerate(@QueryParameter("name") String _name, @QueryParameter Type type, @QueryParameter boolean updateCheck) throws IOException, InterruptedException {
         if (_name.endsWith("-plugin"))  _name = _name.substring(0,_name.length()-7);
 
         final String name = _name;
@@ -52,13 +71,17 @@ public class Application {
             tmpDir.delete();
             tmpDir.mkdir();
 
-            ProcessBuilder pb = new ProcessBuilder(mvn.getAbsolutePath(),
-                    "-B", "-U",
+            List<String> args = new ArrayList<String>();
+            args.add(mvn.getAbsolutePath());
+            if (updateCheck)    args.add("-U"); // limit up to date check
+            args.addAll(Arrays.asList(
+                    "-B",
                     "-s", settings.getAbsolutePath(),
                     "org.jenkins-ci.tools:maven-hpi-plugin:LATEST:create",
                     "-DgroupId=org.jenkins-ci.plugins",
                     "-DartifactId=" + name,
-                    "-DpackageName=org.jenkinsci.plugins." + name.replace('-', '_'));
+                    "-DpackageName=org.jenkinsci.plugins." + name.replace('-', '_')));
+            ProcessBuilder pb = new ProcessBuilder(args);
 
             pb.environment().put("JAVA_HOME",System.getProperty("java.home"));
 
@@ -101,21 +124,34 @@ public class Application {
                 throw new Error();
             }
 
-            return new HttpResponse() {
-                public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
-                    try {
-                        rsp.setContentType("application/octet-stream");
-                        String name = archive.getName();
-                        rsp.setHeader("Content-Disposition","attachment; filename="+name+"-plugin"+name.substring(name.lastIndexOf('.')));
-                        IOUtils.copy(new FileInputStream(archive), rsp.getOutputStream());
-                    } finally {
-                        archive.delete();
-                    }
-                }
-            };
+            return new Archive(name + "-plugin" + type.extension, archive);
         } finally {
             FileUtils.deleteDirectory(tmpDir);
             settings.delete();
+        }
+    }
+
+    private static class Archive implements HttpResponse {
+        private final String fileName;
+        private final File archive;
+
+        public Archive(String fileName, File archive) {
+            this.fileName = fileName;
+            this.archive = archive;
+        }
+
+        public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
+            try {
+                rsp.setContentType("application/octet-stream");
+                rsp.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                IOUtils.copy(new FileInputStream(archive), rsp.getOutputStream());
+            } finally {
+                clear();
+            }
+        }
+
+        private void clear() {
+            archive.delete();
         }
     }
 
