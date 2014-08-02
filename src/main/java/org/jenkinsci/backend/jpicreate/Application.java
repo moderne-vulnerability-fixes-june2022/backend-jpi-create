@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -91,10 +92,15 @@ public class Application {
                 .start();
             proc.getOutputStream().close();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtils.copy(proc.getInputStream(), new TeeOutputStream(System.out,baos));
-            if (proc.waitFor()!=0) {
-                // error
-                return HttpResponses.plainText(baos.toString());
+            InputStream is = proc.getInputStream();
+            try {
+                IOUtils.copy(is, new TeeOutputStream(System.out,baos));
+                if (proc.waitFor()!=0) {
+                    // error
+                    return HttpResponses.plainText(baos.toString());
+                }
+            } finally {
+                is.close();
             }
 
             final File archive;
@@ -144,7 +150,12 @@ public class Application {
             try {
                 rsp.setContentType("application/octet-stream");
                 rsp.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-                IOUtils.copy(new FileInputStream(archive), rsp.getOutputStream());
+                InputStream is = new FileInputStream(archive);
+                try {
+                    IOUtils.copy(is, rsp.getOutputStream());
+                } finally {
+                    is.close();
+                }
             } finally {
                 clear();
             }
