@@ -10,6 +10,7 @@ import javax.servlet.ServletContextEvent;
 import javax.sound.midi.SysexMessage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -41,9 +42,7 @@ public class WebAppMain extends AbstractWebAppMain<Application> {
         FileUtils.copyURLToFile(
                 getClass().getClassLoader().getResource("maven.zip"),
                 zip);
-        File bin = File.createTempFile("maven","bin");
-        bin.delete();
-        bin.mkdirs();
+        File bin = Files.createTempDirectory("maven" + "bin").toFile();
 
         Process unzip = new ProcessBuilder("unzip", zip.getAbsolutePath())
                 .directory(bin).redirectErrorStream(true).start();
